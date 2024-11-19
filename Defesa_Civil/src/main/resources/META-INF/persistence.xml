@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence" version="2.1">
+    <persistence-unit name="DefesaCivil" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+
+        <!-- Classes de entidades -->
+        <class>com.model.Endereco</class>
+        <class>com.model.User</class>
+        <class>com.model.TipoRisco</class>
+        <class>com.model.TipoEmergencia</class>
+        <class>com.model.CadastroFamilia</class>
+        <class>com.model.Membro</class>
+
+        <properties>
+            <!-- Configuração do banco de dados MySQL -->
+            <property name="javax.persistence.jdbc.url" value="jdbc:mysql://127.0.0.1:3306/DefesaCivil?useSSL=false&amp;serverTimezone=UTC"/>
+            <property name="javax.persistence.jdbc.user" value="root"/>
+            <property name="javax.persistence.jdbc.password" value=""/>
+
+            <!-- Configuração do driver JDBC -->
+            <property name="javax.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
+
+            <!-- Configurações do Hibernate -->
+            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL8Dialect"/>
+            <property name="hibernate.hbm2ddl.auto" value="update"/>
+
+            <!-- Logs de SQL para debug -->
+            <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.format_sql" value="true"/>
+        </properties>
+    </persistence-unit>
+</persistence>

@@ -75,6 +75,9 @@ INSERT INTO Users (username, password, role) VALUES ('admin', '12345', 'ADMIN');
 -- Desabilitar modo de segurança da query (permite usar update e delete nos dados do banco)
 SET SQL_SAFE_UPDATES = 0;
 
+delete from membro;
+delete from endereco; 
+
 -- comando para zerar ID
 Alter table endereco auto_increment = 1;
 

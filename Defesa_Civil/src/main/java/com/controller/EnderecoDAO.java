@@ -12,9 +12,37 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
+
 public class EnderecoDAO {
 
-    public Endereco Salvar (Endereco endereco){
+    public Endereco Salvar(Endereco endereco) {
+        EntityManager em = JPAUtil.getEntityManager();
+        EntityTransaction transacao = em.getTransaction();
+        if (endereco.getCEP().length() != 8) {
+            System.err.println("Erro no CEP, deve conter 8 caracteres");
+            return null;
+        } else if (endereco.getNumero() <= 0) {
+            System.err.println("Erro!!! Numero precisa ser diferente de 0");
+            return null;
+        }
+
+        try {
+            transacao.begin();
+            em.merge(endereco);
+            transacao.commit();
+            return endereco;
+        } catch (Exception ex) {
+            if (transacao.isActive()) {
+                transacao.rollback();
+            }
+            System.err.println("Erro ao salvar endereço do membro da familia" + ex.getMessage());
+            return null;
+        } finally {
+            em.close();
+        }
+    }
+
+    public Endereco Atualiazar(Endereco endereco) {
         EntityManager em = JPAUtil.getEntityManager();
         EntityTransaction transacao = em.getTransaction();
 
@@ -23,75 +51,52 @@ public class EnderecoDAO {
             em.merge(endereco);
             transacao.commit();
             return endereco;
-        }
-        catch (Exception ex){
-            if (transacao.isActive()){
+        } catch (Exception ex) {
+            if (transacao.isActive()) {
                 transacao.rollback();
             }
-            System.err.println("Erro ao salvar endereço do membro da familia"+ ex.getMessage());
+            System.err.println("Erro ao buscar id do enderço" + ex.getMessage());
             return null;
-        }finally {
-            em.close();
-        }
-    }
-    public Endereco Atualiazar (Endereco endereco){
-        EntityManager em = JPAUtil.getEntityManager();
-        EntityTransaction transacao = em.getTransaction();
-
-        try {
-            transacao.begin();
-            em.merge(endereco);
-            transacao.commit();
-            return endereco;
-        }
-        catch (Exception ex){
-            if (transacao.isActive()){
-                transacao.rollback();
-            }
-            System.err.println("Erro ao buscar id do enderço"+ ex.getMessage());
-            return null;
-        }finally {
+        } finally {
             em.close();
         }
     }
 
-    public Endereco BuscarPorID (int idEndereco){
+    public Endereco BuscarPorID(int idEndereco) {
         EntityManager em = JPAUtil.getEntityManager();
 
         try {
             return em.find(Endereco.class, idEndereco);
-        }
-        catch (Exception ex){
-            System.err.println("Erro ao buscar id do enderço"+ ex.getMessage());
+        } catch (Exception ex) {
+            System.err.println("Erro ao buscar id do enderço" + ex.getMessage());
             return null;
-        }finally {
+        } finally {
             em.close();
         }
     }
 
 
-
-    public void Deletar(int idEndereco){
+    public void Deletar(int idEndereco) {
         EntityManager em = JPAUtil.getEntityManager();
         EntityTransaction transacao = em.getTransaction();
 
         try {
             transacao.begin();
             Endereco endereco = em.find(Endereco.class, idEndereco);
-            if (endereco != null){
+            if (endereco != null) {
                 em.remove(endereco);
             }
-        }
-        catch (Exception ex){
-            if(transacao.isActive()){
+        } catch (Exception ex) {
+            if (transacao.isActive()) {
                 transacao.rollback();
             }
-            System.err.println("Erro ao Deletar id do enderço"+ ex.getMessage());
-        }finally {
+            System.err.println("Erro ao Deletar id do enderço" + ex.getMessage());
+        } finally {
             em.close();
         }
     }
-    public List<Endereco> ListarEndereco(){
+
+    public List<Endereco> ListarEndereco() {
         EntityManager em = JPAUtil.getEntityManager();
 
         try {
@@ -105,11 +110,11 @@ public class EnderecoDAO {
             em.close();
         }
     }
+
     public Endereco PreencherEnderecoPorCep(String cep) {
         String apiUrl = "https://viacep.com.br/ws/" + cep + "/json/";
 
         try {
-
             URL url = new URL(apiUrl);
             HttpURLConnection conexao = (HttpURLConnection) url.openConnection();
             conexao.setRequestMethod("GET");

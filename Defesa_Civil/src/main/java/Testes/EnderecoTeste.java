@@ -15,17 +15,29 @@ public class EnderecoTeste {
 
         Scanner input = new Scanner(System.in);
 
+
         System.out.println("Digite seu CEP");
-        endereco.setCEP(input.nextLine());
+        Endereco enderecoretornado = enderecoDAO.PreencherEnderecoPorCep(input.nextLine());
 
-
-        System.out.println("Digite o complemento");
-        endereco.setComplemento(input.nextLine());
-
+        enderecoretornado.setCEP(enderecoretornado.getCEP().replace("-", ""));
+        System.out.println("ID: " + enderecoretornado.getIdEndereco() +
+                ", Logradouro: " + enderecoretornado.getLogradouro() +
+                ", Cidade: " + enderecoretornado.getCidade() +
+                ", Complemento: " + enderecoretornado.getComplemento() +
+                ", CEP: " + enderecoretornado.getCEP() +
+                ", Numero: " + enderecoretornado.getNumero());
 
         System.out.println("Digite o numero da rua");
-        endereco.setNumero(input.nextInt());
+        enderecoretornado.setNumero(input.nextInt());
         input.nextLine();
+
+        System.out.println("Digite o complemento");
+        enderecoretornado.setComplemento(input.nextLine());
+        /*
+
+
+
+
 
         System.out.println("Digite o logradouro");
         endereco.setLogradouro(input.nextLine());
@@ -33,8 +45,10 @@ public class EnderecoTeste {
         System.out.println("Digite sua cidade");
         endereco.setCidade(input.nextLine());
 
+*/
 
-        /*Endereco enderecoSalvo = enderecoDAO.Salvar(endereco);
+      /*  Endereco enderecoSalvo = enderecoDAO.Salvar(endereco);
+
 
         if (enderecoSalvo != null) {
             System.out.println("Endereço salvo com sucesso!");
@@ -42,7 +56,7 @@ public class EnderecoTeste {
         } else {
             System.err.println("Erro ao salvar Endereço");
         }
-        */
+       */
 
 
         List<Endereco> enderecos = enderecoDAO.ListarEndereco();
@@ -87,8 +101,8 @@ public class EnderecoTeste {
         System.out.println("Digite a data de nascimento");
         membro.setDataNasc(input.nextLine());
         */
-        System.out.println("Endereço" + endereco.getCEP() + " , " + endereco.getLogradouro() + " , " + endereco.getNumero());
-        membro.setEndereco(endereco);
+        System.out.println("Endereço" + enderecoretornado.getCEP() + " , " + enderecoretornado.getLogradouro() + " , " + enderecoretornado.getNumero());
+        membro.setEndereco(enderecoretornado);
 
         input.close();
         Membro membroSalvo = membroDAO.Salvar(membro);

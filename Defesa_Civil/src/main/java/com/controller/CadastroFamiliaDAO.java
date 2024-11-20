@@ -166,21 +166,4 @@ public class CadastroFamiliaDAO {
             em.close();
         }
     }
-
-
-    public List<CadastroFamilia> BuscarPorDescricao(String descricao) {
-        EntityManager em = JPAUtil.getEntityManager();
-
-        try {
-            return em.createQuery(
-                    "SELECT cf FROM CadastroFamilia cf WHERE cf.descricao LIKE :descricao",
-                    CadastroFamilia.class
-            ).setParameter("descricao", "%" + descricao + "%").getResultList();
-        } catch (Exception ex) {
-            System.err.println("Erro ao buscar cadastros por descrição: " + ex.getMessage());
-            return Collections.emptyList();
-        } finally {
-            em.close();
-        }
-    }
 }

@@ -6,13 +6,14 @@ import javax.persistence.*;
 @Table(name = "CadastroFamilia")
 public class CadastroFamilia {
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idFamilia")
     private int idFamilia;
 
-    @Column(name = "descricao", nullable = false, length = 100)
-    private String descricao;
+    @Column(name = "nomeFamilia", nullable = false, length = 100)
+    private String nomeFamilia;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "TipoRisco_id", referencedColumnName = "idRisco", nullable = false) // Definindo a chave estrangeira
@@ -25,11 +26,12 @@ public class CadastroFamilia {
 
     public CadastroFamilia() {}
 
-    public CadastroFamilia(int idFamilia, String descricao, TipoRisco tipoRisco, TipoEmergencia tipoEmergencia) {
+    public CadastroFamilia(int idFamilia, String nomeFamilia, TipoRisco tipoRisco, TipoEmergencia tipoEmergencia) {
         this.idFamilia = idFamilia;
-        this.descricao = descricao;
+        this.nomeFamilia = nomeFamilia;
         this.tipoRisco = tipoRisco;
         this.tipoEmergencia = tipoEmergencia;
+
     }
 
     public int getIdFamilia() {
@@ -40,12 +42,12 @@ public class CadastroFamilia {
         this.idFamilia = idFamilia;
     }
 
-    public String getDescricao() {
-        return descricao;
+    public String getNomeFamilia() {
+        return nomeFamilia;
     }
 
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
+    public void setNomeFamilia(String nomeFamilia) {
+        this.nomeFamilia = nomeFamilia;
     }
 
     public TipoRisco getTipoRisco() {

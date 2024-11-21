@@ -1,6 +1,9 @@
 package com.controller;
 
 import com.model.CadastroFamilia;
+import com.model.TipoEmergencia;
+import com.model.TipoRisco;
+import com.model.Endereco;
 import util.JPAUtil;
 
 import javax.persistence.EntityManager;
@@ -10,46 +13,92 @@ import java.util.List;
 
 public class CadastroFamiliaDAO {
 
-    public CadastroFamilia Salvar(CadastroFamilia cf){
-        EntityManager em = JPAUtil.getEntityManager();
-        EntityTransaction transacao = em.getTransaction();
 
-        try {
-            transacao.begin();
-            em.merge(cf);
-            transacao.commit();
-            return cf;
+    private boolean validarCadastroFamilia(CadastroFamilia cf) {
+        if (cf == null) {
+            System.err.println("Cadastro de família não pode ser nulo.");
+            return false;
         }
-        catch (Exception ex){
-            if(transacao.isActive()){
-                transacao.rollback();
-            }
-            System.err.println("Erro ao salvar Cadastro da familia"+ ex.getMessage());
-            return cf;
-        }finally {
+        if (cf.getNomeFamilia() == null || cf.getNomeFamilia().trim().isEmpty()) {
+            System.err.println("O nome da família é obrigatório.");
+            return false;
+        }
+        if (!validarTipoRisco(cf.getTipoRisco().getIdRisco())) {
+            System.err.println("Tipo de risco inválido ou inexistente.");
+            return false;
+        }
+        if (!validarTipoEmergencia(cf.getTipoEmergencia().getIdEmergencia())) {
+            System.err.println("Tipo de emergência inválido ou inexistente.");
+            return false;
+        }
+        return true;
+    }
+
+    private boolean validarTipoRisco(int idRisco) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            return em.find(TipoRisco.class, idRisco) != null;
+        } finally {
             em.close();
         }
     }
-    public CadastroFamilia Atualizar(CadastroFamilia cf){
+
+    private boolean validarTipoEmergencia(int idEmergencia) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            return em.find(TipoEmergencia.class, idEmergencia) != null;
+        } finally {
+            em.close();
+        }
+    }
+
+
+    public CadastroFamilia Salvar(CadastroFamilia cf) {
         EntityManager em = JPAUtil.getEntityManager();
         EntityTransaction transacao = em.getTransaction();
 
-        try {
-            transacao.begin();
-            em.merge(cf);
-            transacao.commit();
-            return cf;
-        }
-        catch (Exception ex){
-            if(transacao.isActive()){
-                transacao.rollback();
-            }
-            System.err.println("Erro ao atualizar cadastro da familia"+ ex.getMessage());
+        if (!validarCadastroFamilia(cf)) {
             return null;
-        }finally {
+        }
+        try {
+            transacao.begin();
+            em.merge(cf);
+            transacao.commit();
+            return cf;
+        } catch (Exception ex) {
+            if (transacao.isActive()) {
+                transacao.rollback();
+            }
+            System.err.println("Erro ao salvar Cadastro da família: " + ex.getMessage());
+            return null;
+        } finally {
             em.close();
         }
     }
+
+    public CadastroFamilia Atualizar(CadastroFamilia cf) {
+        EntityManager em = JPAUtil.getEntityManager();
+        EntityTransaction transacao = em.getTransaction();
+
+        if (!validarCadastroFamilia(cf)) {
+            return null;
+        }
+        try {
+            transacao.begin();
+            em.merge(cf);
+            transacao.commit();
+            return cf;
+        } catch (Exception ex) {
+            if (transacao.isActive()) {
+                transacao.rollback();
+            }
+            System.err.println("Erro ao atualizar cadastro da família: " + ex.getMessage());
+            return null;
+        } finally {
+            em.close();
+        }
+    }
+
     public CadastroFamilia BuscarPorId(int idFamilia) {
         EntityManager em = JPAUtil.getEntityManager();
 
@@ -62,7 +111,6 @@ public class CadastroFamiliaDAO {
             em.close();
         }
     }
-
 
     public boolean Deletar(int idFamilia) {
         EntityManager em = JPAUtil.getEntityManager();
@@ -90,7 +138,6 @@ public class CadastroFamiliaDAO {
         }
     }
 
-
     public List<CadastroFamilia> ListarCadastroFamilia() {
         EntityManager em = JPAUtil.getEntityManager();
 
@@ -103,7 +150,6 @@ public class CadastroFamiliaDAO {
             em.close();
         }
     }
-
 
     public List<CadastroFamilia> BuscarPorTipoRisco(int idRisco) {
         EntityManager em = JPAUtil.getEntityManager();
@@ -121,7 +167,6 @@ public class CadastroFamiliaDAO {
         }
     }
 
-
     public List<CadastroFamilia> BuscarPorTipoEmergencia(int idEmergencia) {
         EntityManager em = JPAUtil.getEntityManager();
 
@@ -138,14 +183,17 @@ public class CadastroFamiliaDAO {
         }
     }
 
-
     public List<CadastroFamilia> ListarComPaginacao(int offset, int limite) {
+        if (offset < 0 || limite <= 0) {
+            throw new IllegalArgumentException("Offset e limite devem ser valores positivos.");
+        }
+
         EntityManager em = JPAUtil.getEntityManager();
 
         try {
             return em.createQuery("FROM CadastroFamilia", CadastroFamilia.class)
-                    .setFirstResult(offset) // Início
-                    .setMaxResults(limite) // Quantidade
+                    .setFirstResult(offset)
+                    .setMaxResults(limite)
                     .getResultList();
         } catch (Exception ex) {
             System.err.println("Erro ao listar cadastros com paginação: " + ex.getMessage());
@@ -154,7 +202,6 @@ public class CadastroFamiliaDAO {
             em.close();
         }
     }
-
 
     public boolean ExistePorId(int idFamilia) {
         EntityManager em = JPAUtil.getEntityManager();

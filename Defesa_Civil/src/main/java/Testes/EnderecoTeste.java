@@ -1,9 +1,9 @@
 package Testes;
-import com.controller.EnderecoDAO;
-import com.controller.MembroDAO;
-import com.model.Endereco;
-import com.model.Membro;
+import com.controller.*;
+import com.model.*;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 import java.util.List;
 
@@ -21,11 +21,13 @@ public class EnderecoTeste {
 
         enderecoretornado.setCEP(enderecoretornado.getCEP().replace("-", ""));
         System.out.println("ID: " + enderecoretornado.getIdEndereco() +
-                ", Logradouro: " + enderecoretornado.getLogradouro() +
-                ", Cidade: " + enderecoretornado.getCidade() +
-                ", Complemento: " + enderecoretornado.getComplemento() +
                 ", CEP: " + enderecoretornado.getCEP() +
-                ", Numero: " + enderecoretornado.getNumero());
+                ", Cidade: " + enderecoretornado.getCidade() +
+                ", Logradouro: " + enderecoretornado.getLogradouro() +
+                ", Numero: " + enderecoretornado.getNumero()+
+                ", Complemento: " + enderecoretornado.getComplemento() );
+
+
 
         System.out.println("Digite o numero da rua");
         enderecoretornado.setNumero(input.nextInt());
@@ -33,6 +35,7 @@ public class EnderecoTeste {
 
         System.out.println("Digite o complemento");
         enderecoretornado.setComplemento(input.nextLine());
+
         /*
 
 
@@ -64,16 +67,57 @@ public class EnderecoTeste {
         if (enderecos != null && !enderecos.isEmpty()) {
             System.out.println("Endereços encontrados ");
             for (Endereco enderecoParaListagem : enderecos) {
-                System.out.println("ID: " + enderecoParaListagem.getIdEndereco() +
-                        ", Logradouro: " + enderecoParaListagem.getLogradouro() +
-                        ", Cidade: " + enderecoParaListagem.getCidade() +
-                        ", Complemento: " + enderecoParaListagem.getComplemento() +
-                        ", CEP: " + enderecoParaListagem.getCEP() +
-                        ", Numero: " + enderecoParaListagem.getNumero());
+                System.out.println("ID: " + enderecoretornado.getIdEndereco() +
+                        ", CEP: " + enderecoretornado.getCEP() +
+                        ", Cidade: " + enderecoretornado.getCidade() +
+                        ", Logradouro: " + enderecoretornado.getLogradouro() +
+                        ", Numero: " + enderecoretornado.getNumero()+
+                        ", Complemento: " + enderecoretornado.getComplemento() );
+
             }
         } else {
             System.out.println("Nenhum endereço encontrado em ");
         }
+        CadastroFamilia cadastroFamilia = new CadastroFamilia();
+        CadastroFamiliaDAO cadastroFamiliaDAO = new CadastroFamiliaDAO();
+
+        System.out.println("Digite o nome da familia");
+        cadastroFamilia.setNomeFamilia(input.nextLine());
+
+        TipoRiscoDAO tipoRisco = new TipoRiscoDAO();
+        List<TipoRisco> riscos = tipoRisco.listarTodos();
+
+        if (riscos != null && !riscos.isEmpty()) {
+            System.out.println("Riscos encontrados ");
+            for (TipoRisco risco : riscos) {
+                System.out.println("ID: " + risco.getIdRisco() +
+                        ", Categoria: " + risco.getCategoria()+"\n");
+
+            }
+        } else {
+            System.out.println("Nenhum risco encontrado");
+        }
+
+        System.out.println("Digite o tipo de risco");
+        cadastroFamilia.setTipoRisco(tipoRisco.buscarPorId(input.nextInt()));
+        input.nextLine();
+
+        TipoEmergenciaDAO tipoEmergencia = new TipoEmergenciaDAO();
+        List<TipoEmergencia> emergencias = tipoEmergencia.listarTodos();
+        if (emergencias != null && !emergencias.isEmpty()) {
+            System.out.println("Emergencias encontrados ");
+            for (TipoEmergencia emergencia : emergencias) {
+                System.out.println("ID: " + emergencia.getIdEmergencia() +
+                        ", Categoria: " + emergencia.getCategoria()+"\n");
+
+            }
+        } else {
+            System.out.println("Nenhuma emergencia encontrado");
+        }
+
+        System.out.println("Digite o tipo de emergencia");
+        cadastroFamilia.setTipoEmergencia(tipoEmergencia.buscarPorId(input.nextInt()));
+        input.nextLine();
 
         Membro membro = new Membro();
         MembroDAO membroDAO = new MembroDAO();
@@ -97,21 +141,31 @@ public class EnderecoTeste {
         System.out.println("Digite um contato de emergencia");
         membro.setNumEmergencia(input.nextLine());
 
-        /*
-        System.out.println("Digite a data de nascimento");
-        membro.setDataNasc(input.nextLine());
-        */
+
+
+//        System.out.println("Digite a data de nascimento");
+//        membro.setDataNasc(LocalDate.parse(input.nextLine()));
+//        DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
         System.out.println("Endereço" + enderecoretornado.getCEP() + " , " + enderecoretornado.getLogradouro() + " , " + enderecoretornado.getNumero());
         membro.setEndereco(enderecoretornado);
 
         input.close();
-        Membro membroSalvo = membroDAO.Salvar(membro);
 
-        if (membroSalvo != null) {
-            System.out.println("membro salvo com sucesso!");
-            System.out.println("Membro salvo: " + membroSalvo.getNome());
+
+
+
+        membro.setCadastroFamilia(cadastroFamilia);
+        Membro membroSalva = membroDAO.Salvar(membro);
+
+
+
+
+        if (cadastroFamilia != null) {
+            System.out.println("Familia salva com sucesso!");
+            System.out.println("Familia salva: " + cadastroFamilia.getNomeFamilia());
         } else {
-            System.err.println("Erro ao salvar membro");
+            System.err.println("Erro ao salvar Familia");
         }
 
     }

@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS TipoEmergencia(
 
 CREATE TABLE IF NOT EXISTS CadastroFamilia(
     idFamilia INT AUTO_INCREMENT,
-    descricao VARCHAR(100) NOT NULL,
+    nomeFamilia VARCHAR(100) NOT NULL,
     TipoRisco_id INT, 
     TipoEmergencia_id INT, 
     PRIMARY KEY (idFamilia),
@@ -74,7 +74,7 @@ INSERT INTO Users (username, password, role) VALUES ('admin', '12345', 'ADMIN');
 
 -- Desabilitar modo de segurança da query (permite usar update e delete nos dados do banco)
 SET SQL_SAFE_UPDATES = 0;
-
+delete from cadastroFamilia;
 delete from membro;
 delete from endereco; 
 
@@ -85,8 +85,14 @@ Alter table endereco auto_increment = 1;
 update endereco set Complemento = 'Apartamento' where idEndereco in (4);
 
 SELECT*
+FROM tipoRisco;
+SELECT*
+FROM tipoEmergencia;
+SELECT*
 FROM endereco;
 SELECT*
 FROM users;
 SELECT*
 FROM membro;
+SELECT*
+FROM cadastroFamilia;

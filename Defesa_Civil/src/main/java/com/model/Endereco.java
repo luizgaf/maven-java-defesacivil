@@ -27,6 +27,7 @@ public class Endereco {
     private String complemento;
 
 
+
     public Endereco() {}
 
     public Endereco(int idEndereco, String logradouro, int numero, String cidade, String CEP, String complemento) {

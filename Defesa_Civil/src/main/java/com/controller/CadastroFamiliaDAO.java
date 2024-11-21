@@ -99,13 +99,35 @@ public class CadastroFamiliaDAO {
         }
     }
 
-    public CadastroFamilia BuscarPorId(int idFamilia) {
+    public CadastroFamilia BuscarPor(int idFamilia) {
         EntityManager em = JPAUtil.getEntityManager();
 
         try {
             return em.find(CadastroFamilia.class, idFamilia);
         } catch (Exception ex) {
             System.err.println("Erro ao buscar o cadastro da família por ID: " + ex.getMessage());
+            return null;
+        } finally {
+            em.close();
+        }
+    }
+
+    public CadastroFamilia BuscarPorNome(String nomeFamilia) {
+        EntityManager em = JPAUtil.getEntityManager();
+
+        try {
+            String jpql = "SELECT c FROM CadastroFamilia c WHERE c.nome = :nomeFamilia";
+            List<CadastroFamilia> resultados = em.createQuery(jpql, CadastroFamilia.class)
+                    .setParameter("nomeFamilia", nomeFamilia)
+                    .getResultList();
+
+            if (resultados.isEmpty()) {
+                return null;
+            } else {
+                return resultados.get(0);
+            }
+        } catch (Exception ex) {
+            System.err.println("Erro ao buscar o cadastro da família por nome: " + ex.getMessage());
             return null;
         } finally {
             em.close();

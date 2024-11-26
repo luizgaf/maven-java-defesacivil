@@ -3,6 +3,8 @@ package com.view;
 import com.controller.UserDAO;
 import com.model.User;
 import util.CriptografiaUtil;
+import com.controller.*;
+import com.model.*;
 
 import javax.swing.*;
 

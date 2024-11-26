@@ -11,6 +11,7 @@ import com.controller.*;
 import com.model.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 public class FrontEndCadastroMembro extends JPanel {
     private BufferedImage image;
@@ -18,6 +19,8 @@ public class FrontEndCadastroMembro extends JPanel {
     private JFrame frame;
     private JFormattedTextField telefoneField, telEmergenciaField, cpfField, cepField, birthDateField;
     private JTextField nameField, emailField, logradouroField, numeroField, cidadeField, complementoField;
+    private CadastroFamilia familiaSelecionada;
+    private JTextField familiaField;
 
     public FrontEndCadastroMembro(JFrame frame) {
         this.frame = frame;
@@ -101,6 +104,20 @@ public class FrontEndCadastroMembro extends JPanel {
         dataPanel.add(birthDateLabel);
         dataPanel.add(birthDateField);
 
+        JPanel familiaPanel = new JPanel(new FlowLayout());
+        JLabel familiaLabel = new JLabel("Família Selecionada:");
+        familiaField = new JTextField("Nenhuma família selecionada");
+        familiaField.setPreferredSize(new Dimension(300, 30));
+        familiaField.setEditable(false);
+        familiaPanel.add(familiaLabel);
+        familiaPanel.add(familiaField);
+
+        JButton selecionarFamiliaButton = new JButton("Selecionar Família");
+        selecionarFamiliaButton.addActionListener(e -> selecionarFamilia());
+        familiaPanel.add(selecionarFamiliaButton);
+
+        inputs.add(familiaPanel);
+
 
         // Upload de Foto
         JLabel uploadFoto = new JLabel("Upload Foto:");
@@ -148,21 +165,20 @@ public class FrontEndCadastroMembro extends JPanel {
             e.printStackTrace();
         }
 
-        logradouroField.setPreferredSize(new Dimension(300, 30));
-        numeroField.setPreferredSize(new Dimension(80, 30));
+        logradouroField.setPreferredSize(new Dimension(500, 30));
+        numeroField.setPreferredSize(new Dimension(60, 30));
         cepField.setPreferredSize(new Dimension(120, 30));
-        cidadeField.setPreferredSize(new Dimension(200, 30));
+        cidadeField.setPreferredSize(new Dimension(150, 30));
         complementoField.setPreferredSize(new Dimension(300, 30));
 
-
+        enderecoInput.add(new JLabel("CEP:"));
+        enderecoInput.add(cepField);
         enderecoInput.add(new JLabel("Logradouro:"));
         enderecoInput.add(logradouroField);
         enderecoInput.add(new JLabel("Complemento:"));
         enderecoInput.add(complementoField);
         enderecoInput.add(new JLabel("Número:"));
         enderecoInput.add(numeroField);
-        enderecoInput.add(new JLabel("CEP:"));
-        enderecoInput.add(cepField);
         enderecoInput.add(new JLabel("Cidade:"));
         enderecoInput.add(cidadeField);
 
@@ -250,11 +266,9 @@ public class FrontEndCadastroMembro extends JPanel {
 
             String birthDate = birthDateField.getText().trim();
 
-
             // Converter para LocalDate
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             LocalDate birthDateParsed = LocalDate.parse(birthDate, formatter);
-
 
             // Validar campos obrigatórios
             StringBuilder erros = new StringBuilder();
@@ -279,6 +293,11 @@ public class FrontEndCadastroMembro extends JPanel {
                 return;
             }
 
+            if (familiaSelecionada == null) {
+                JOptionPane.showMessageDialog(this, "Por favor, selecione uma família.", "Erro de Validação", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             // Mostrar erros, se houver
             if (erros.length() > 0) {
                 JOptionPane.showMessageDialog(this, erros.toString(), "Erro de Validação", JOptionPane.ERROR_MESSAGE);
@@ -297,21 +316,24 @@ public class FrontEndCadastroMembro extends JPanel {
             EnderecoDAO enderecoDAO = new EnderecoDAO();
             Endereco enderecoSalvo = enderecoDAO.Salvar(endereco);
 
-            if (enderecoSalvo == null) {
+            if (enderecoSalvo == null || enderecoSalvo.getIdEndereco() == 0) { // Verifica se o endereço foi salvo corretamente
                 JOptionPane.showMessageDialog(this, "Erro ao salvar o endereço no banco de dados.", "Erro", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            // Criar instância do Membro
-            Membro membro = new Membro();
-            membro.setNome(nome);
-            membro.setCPF(cpf);
-            membro.setNumTelefone(telefone);
-            membro.setNumEmergencia(telEmergencia);
-            membro.setEndereco(enderecoSalvo);
-            membro.setEmail(email);
-            membro.setDataNasc(birthDateParsed);
-            membro.setFoto(fotoBytes);
+            // Criar instância do Membro usando o construtor
+            CadastroFamilia cadastroFamilia = null; // Ajuste aqui com base na lógica para associar um CadastroFamilia
+            Membro membro = new Membro(
+                    cpf,
+                    nome,
+                    telefone,
+                    birthDateParsed,
+                    email,
+                    telEmergencia,
+                    enderecoSalvo, // Passa o objeto Endereco completo
+                    familiaSelecionada, // Passa a família selecionada
+                    fotoBytes
+            );
 
             // Salvar membro no banco
             MembroDAO membroDAO = new MembroDAO();
@@ -335,10 +357,63 @@ public class FrontEndCadastroMembro extends JPanel {
         }
     }
 
+    private void selecionarFamilia() {
+        // Criar diálogo para seleção
+        JDialog dialog = new JDialog((Frame) null, "Selecionar Família", true);
+        dialog.setSize(400, 200);
+        dialog.setLayout(new BorderLayout());
+
+        // Obter lista de famílias do DAO
+        CadastroFamiliaDAO familiaDAO = new CadastroFamiliaDAO();
+        List<CadastroFamilia>  familias = familiaDAO.ListarCadastroFamilia();
+
+        if (familias == null ) {
+            JOptionPane.showMessageDialog(this, "Nenhuma família cadastrada.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // Criar ComboBox para selecionar a família
+        JComboBox<CadastroFamilia> familiaComboBox = new JComboBox<>();
+        for (CadastroFamilia familia : familias) {
+            familiaComboBox.addItem(familia);
+        }
+
+        dialog.add(familiaComboBox, BorderLayout.CENTER);
+
+        // Botão de confirmação
+        JButton confirmarButton = new JButton("Confirmar");
+        confirmarButton.addActionListener(e -> {
+            // Obter família selecionada
+            familiaSelecionada = (CadastroFamilia) familiaComboBox.getSelectedItem();
+            if (familiaSelecionada != null) {
+                familiaField.setText(familiaSelecionada.toString()); // Atualizar o campo com o nome da família
+            }
+            dialog.dispose();
+        });
+
+        dialog.add(confirmarButton, BorderLayout.SOUTH);
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
+    }
+
+
+
+    public void setFrame(JFrame frame) {
+        this.frame = frame;
+    }
+
 
     private void voltar() {
         if (frame != null) {
-            frame.dispose();
+            int confirm = JOptionPane.showConfirmDialog(
+                    frame,
+                    "Tem certeza que deseja cancelar?",
+                    "Confirmação",
+                    JOptionPane.YES_NO_OPTION
+            );
+            if (confirm == JOptionPane.YES_OPTION) {
+                frame.dispose();
+            }
         }
     }
 }

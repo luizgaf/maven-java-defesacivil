@@ -65,4 +65,9 @@ public class CadastroFamilia {
     public void setTipoEmergencia(TipoEmergencia tipoEmergencia) {
         this.tipoEmergencia = tipoEmergencia;
     }
+
+    @Override
+    public String toString() {
+        return nomeFamilia;
+    }
 }

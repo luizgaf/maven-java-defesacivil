@@ -62,9 +62,9 @@ public class CadastroFamiliaDAO {
         }
         try {
             transacao.begin();
-            em.merge(cf);
+            CadastroFamilia fam = em.merge(cf);
             transacao.commit();
-            return cf;
+            return fam;
         } catch (Exception ex) {
             if (transacao.isActive()) {
                 transacao.rollback();

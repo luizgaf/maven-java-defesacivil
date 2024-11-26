@@ -38,9 +38,9 @@ public class EnderecoDAO {
 
         try {
             transacao.begin();
-            em.merge(endereco);
+            Endereco end = em.merge(endereco);
             transacao.commit();
-            return endereco;
+            return end;
         } catch (Exception ex) {
             if (transacao.isActive()) {
                 transacao.rollback();

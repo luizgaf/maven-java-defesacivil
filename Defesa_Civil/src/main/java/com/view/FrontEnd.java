@@ -11,7 +11,7 @@ public class FrontEnd extends JPanel{
     
     private FrontEndCadastro cadastroPanel;
 
-    private JButton verCadastro, adcCadastro, btnSair;
+    private JButton verCadastro, adcCadastro, btnSair, adcMembroFamilia;
 
 
     public FrontEnd(JFrame frame){
@@ -24,42 +24,56 @@ public class FrontEnd extends JPanel{
 
         JPanel botoesPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 30));
 
-        verCadastro = new JButton("Ver Cadastros");
-        adcCadastro = new JButton("Adicionar Cadastros");
+
+        adcCadastro = new JButton("Adicionar Família");
+        adcMembroFamilia = new JButton("Adicionar Membro");
         btnSair = new JButton("Sair");
 
-        addHoverEffect(verCadastro);
         addHoverEffect(adcCadastro);
         addHoverEffect(btnSair);
+        addHoverEffect(adcMembroFamilia);
 
-        botoesPanel.add(verCadastro);
         botoesPanel.add(adcCadastro);
+        botoesPanel.add(adcMembroFamilia);
         botoesPanel.add(btnSair);
 
         btnSair.addActionListener(e -> btnSair(frame));
 
         add(botoesPanel, BorderLayout.CENTER);
 
-        adcCadastro.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                janelaCadastro();
-            }
-        });
+        adcCadastro.addActionListener(e -> janelaCadastro());
+        adcMembroFamilia.addActionListener(e -> adicionarMembro());
     }
 
-    private void janelaCadastro(){
-        JFrame frameCadastro = new JFrame("Cadastro de Família");
-        frameCadastro.setSize(630, 500);
-        frameCadastro.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    private void criarJanela(String titulo, Dimension dimensao, JPanel painel) {
+        JFrame janela = new JFrame(titulo);
+        janela.setSize(dimensao);
+        janela.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        cadastroPanel = new FrontEndCadastro(frameCadastro);
-        frameCadastro.add(cadastroPanel);
-        frameCadastro.setResizable(false);
+        // Configura o frame no painel, se aplicável
+        if (painel instanceof FrontEndCadastro) {
+            ((FrontEndCadastro) painel).setFrame(janela);
+        } else if (painel instanceof FrontEndCadastroMembro) {
+            ((FrontEndCadastroMembro) painel).setFrame(janela);
+        }
 
-        frameCadastro.setLocationRelativeTo(null);
-        frameCadastro.setVisible(true);
+        janela.add(painel);
+        janela.setResizable(false);
+        janela.setLocationRelativeTo(null);
+        janela.setVisible(true);
     }
+
+
+    private void janelaCadastro() {
+        JPanel cadastroPanel = new FrontEndCadastro(new JFrame());
+        criarJanela("Cadastro de Família", new Dimension(630, 500), cadastroPanel);
+    }
+
+    private void adicionarMembro() {
+        JPanel membropanel = new FrontEndCadastroMembro(new JFrame());
+        criarJanela("Adição de Membro", new Dimension(800, 1000), membropanel);
+    }
+
 
     public void btnSair(JFrame frame){
         frame.dispose();

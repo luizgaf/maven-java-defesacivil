@@ -15,11 +15,11 @@ public class CadastroFamilia {
     @Column(name = "nomeFamilia", nullable = false, length = 100)
     private String nomeFamilia;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "TipoRisco_id", referencedColumnName = "idRisco", nullable = false) // Definindo a chave estrangeira
     private TipoRisco tipoRisco;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "TipoEmergencia_id", referencedColumnName = "idEmergencia", nullable = false) // Definindo a chave estrangeira
     private TipoEmergencia tipoEmergencia;
 

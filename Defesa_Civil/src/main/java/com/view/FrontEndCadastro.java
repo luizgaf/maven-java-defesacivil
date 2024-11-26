@@ -3,31 +3,32 @@ package com.view;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.text.*;
 import com.controller.*;
 import com.model.*;
-import java.util.List;
-
-
 
 public class FrontEndCadastro extends JPanel {
 
-    private JButton adicionarButton, voltarButton, associarMembroButton;
+    public JButton salvarButton, voltarButton, associarMembroButton;
     private JTextField nomeFamiliaField;
     private JComboBox<String> risco, tipoEmergencia;
     private JFrame parentFrame;
+    private CadastroFamilia familiaAtual; // Família que será editada ou criada
 
     public FrontEndCadastro(JFrame parentFrame) {
         this.parentFrame = parentFrame;
+        this.familiaAtual = null; // Novo cadastro por padrão
 
         setLayout(new BorderLayout());
 
+        // Título
         JLabel label = new JLabel("Cadastro de Família", JLabel.CENTER);
         label.setFont(new Font("Arial", Font.BOLD, 24));
         label.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
         add(label, BorderLayout.NORTH);
 
-        JPanel inputs = new JPanel(new GridLayout(0, 1));
+        // Painel de entrada de dados
+        JPanel inputs = new JPanel();
+        inputs.setLayout(new BoxLayout(inputs, BoxLayout.Y_AXIS));
 
         // Campo Nome da Família
         JPanel nomeFamiliaInput = new JPanel(new FlowLayout());
@@ -39,13 +40,13 @@ public class FrontEndCadastro extends JPanel {
         inputs.add(nomeFamiliaInput);
 
         // Campo Nível de Risco
-        JPanel riscoImput = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JPanel riscoInput = new JPanel(new FlowLayout(FlowLayout.CENTER));
         String[] riscoStrings = {"Em risco", "Alto Risco", "Extremo Risco"};
         risco = new JComboBox<>(riscoStrings);
         risco.setPreferredSize(new Dimension(150, 30));
-        riscoImput.add(new JLabel("Nível de Risco:"));
-        riscoImput.add(risco);
-        inputs.add(riscoImput);
+        riscoInput.add(new JLabel("Nível de Risco:"));
+        riscoInput.add(risco);
+        inputs.add(riscoInput);
 
         // Campo Tipo de Emergência
         JPanel tipoEmergenciaInput = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -56,37 +57,30 @@ public class FrontEndCadastro extends JPanel {
         tipoEmergenciaInput.add(tipoEmergencia);
         inputs.add(tipoEmergenciaInput);
 
-        // Botão para Associar Membros
-        JPanel associarMembroPanel = new JPanel(new FlowLayout());
-        associarMembroButton = new JButton("Associar Membros");
-        associarMembroButton.addActionListener(e -> abrirDialogoAssociarMembros());
-        associarMembroPanel.add(associarMembroButton);
-        inputs.add(associarMembroPanel);
-
         add(inputs, BorderLayout.CENTER);
 
-        // Painel de Botões
+        // Painel de botões
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
-        adicionarButton = new JButton("Concluído");
+        salvarButton = new JButton("Salvar");
         voltarButton = new JButton("Voltar");
 
-        addHoverEffect(adicionarButton);
+        addHoverEffect(salvarButton);
         addHoverEffect(voltarButton);
 
-        adicionarButton.addActionListener(e -> adicionarFamilia());
+        salvarButton.addActionListener(e -> salvarFamilia());
         voltarButton.addActionListener(e -> voltar());
 
-        buttonPanel.add(adicionarButton);
+        buttonPanel.add(salvarButton);
         buttonPanel.add(voltarButton);
         add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    private void adicionarFamilia() {
+    private void salvarFamilia() {
         try {
             // Obter valores dos campos
             String nomeFamilia = nomeFamiliaField.getText().trim();
-            String nivelRisco = (String) risco.getSelectedItem(); // Ex.: "Em risco", "Alto Risco", "Extremo Risco"
-            String tipoEmergenciaSelecionado = (String) tipoEmergencia.getSelectedItem(); // Ex.: "Inundação", "Vendaval"
+            String nivelRisco = (String) risco.getSelectedItem();
+            String tipoEmergenciaSelecionado = (String) tipoEmergencia.getSelectedItem();
 
             // Validar campos obrigatórios
             StringBuilder erros = new StringBuilder();
@@ -128,21 +122,24 @@ public class FrontEndCadastro extends JPanel {
             TipoRisco tipoRisco = new TipoRisco(idRisco, nivelRisco);
             TipoEmergencia tipoEmergencia = new TipoEmergencia(idEmergencia, tipoEmergenciaSelecionado);
 
-            // Criar instância de CadastroFamilia
-            CadastroFamilia cadastroFamilia = new CadastroFamilia();
-            cadastroFamilia.setNomeFamilia(nomeFamilia);
-            cadastroFamilia.setTipoRisco(tipoRisco);
-            cadastroFamilia.setTipoEmergencia(tipoEmergencia);
+            // Criar ou Atualizar instância de CadastroFamilia
+            if (familiaAtual == null) {
+                familiaAtual = new CadastroFamilia();
+            }
+
+            familiaAtual.setNomeFamilia(nomeFamilia);
+            familiaAtual.setTipoRisco(tipoRisco);
+            familiaAtual.setTipoEmergencia(tipoEmergencia);
 
             // Salvar no banco de dados usando o DAO
             CadastroFamiliaDAO dao = new CadastroFamiliaDAO();
-            CadastroFamilia familiaSalva = dao.Salvar(cadastroFamilia);
+            CadastroFamilia familiaSalva = dao.Salvar(familiaAtual);
 
             // Verificar se foi salvo com sucesso
             if (familiaSalva == null || familiaSalva.getIdFamilia() == 0) {
                 JOptionPane.showMessageDialog(this, "Erro ao salvar a família no banco de dados.", "Erro", JOptionPane.ERROR_MESSAGE);
             } else {
-                JOptionPane.showMessageDialog(this, "Família cadastrada com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Família salva com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
                 if (parentFrame != null) {
                     parentFrame.dispose();
                 }
@@ -152,54 +149,6 @@ public class FrontEndCadastro extends JPanel {
             ex.printStackTrace();
         }
     }
-
-
-    private void abrirDialogoAssociarMembros() {
-        try {
-            JDialog dialog = new JDialog((Frame) null, "Associar Membros", true);
-            dialog.setSize(400, 300);
-            dialog.setLayout(new BorderLayout());
-
-            // Obter membros cadastrados do DAO
-            MembroDAO membroDAO = new MembroDAO();
-            List<Membro> membros = membroDAO.ListarMembros();
-
-            if (membros == null) {
-                JOptionPane.showMessageDialog(this, "Nenhum membro cadastrado.", "Aviso", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            // Criar lista de seleção de membros
-            DefaultListModel<Membro> listModel = new DefaultListModel<>();
-            for (Membro membro : membros) {
-                listModel.addElement(membro);
-            }
-
-            JList<Membro> membroList = new JList<>(listModel);
-            membroList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-            JScrollPane scrollPane = new JScrollPane(membroList);
-
-            dialog.add(scrollPane, BorderLayout.CENTER);
-
-            // Botão de confirmação
-            JButton confirmarButton = new JButton("Confirmar");
-            confirmarButton.addActionListener(e -> {
-                List<Membro> membrosSelecionados = membroList.getSelectedValuesList();
-                if (membrosSelecionados != null ) {
-                    System.out.println("Membros associados: " + membrosSelecionados);
-                }
-                dialog.dispose();
-            });
-
-            dialog.add(confirmarButton, BorderLayout.SOUTH);
-            dialog.setLocationRelativeTo(this);
-            dialog.setVisible(true);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro ao carregar os membros: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
-        }
-    }
-
 
     private void voltar() {
         if (parentFrame != null) {
@@ -215,15 +164,31 @@ public class FrontEndCadastro extends JPanel {
         }
     }
 
-    public void setFrame(JFrame frame) {
-        this.parentFrame = frame;
+    public CadastroFamilia getFamiliaAtual() {
+        return familiaAtual;
+    }
+
+    public void preencherCampos(CadastroFamilia familia) {
+        this.familiaAtual = familia;
+        if (familia == null) {
+            JOptionPane.showMessageDialog(this, "Erro ao carregar os dados da família.", "Erro", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        nomeFamiliaField.setText(familia.getNomeFamilia());
+        if (familia.getTipoRisco() != null) {
+            risco.setSelectedItem(familia.getTipoRisco().getCategoria());
+        }
+        if (familia.getTipoEmergencia() != null) {
+            tipoEmergencia.setSelectedItem(familia.getTipoEmergencia().getCategoria());
+        }
     }
 
     public void addHoverEffect(JButton button) {
         button.setBackground(new Color(50, 50, 50));
         button.setForeground(Color.white);
         button.setFont(new Font("Arial", Font.BOLD, 14));
-        button.setPreferredSize(new Dimension(200, 50));
+        button.setPreferredSize(new Dimension(150, 50));
 
         button.addMouseListener(new MouseAdapter() {
             @Override
@@ -239,5 +204,8 @@ public class FrontEndCadastro extends JPanel {
             }
         });
     }
-}
 
+    public void setFrame(JFrame frame) {
+        this.parentFrame = frame;
+    }
+}

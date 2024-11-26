@@ -8,8 +8,6 @@ import com.model.*;
 
 
 public class FrontEnd extends JPanel{
-    
-    private FrontEndCadastro cadastroPanel;
 
     private JButton verCadastro, adcCadastro, btnSair, adcMembroFamilia;
 
@@ -24,15 +22,17 @@ public class FrontEnd extends JPanel{
 
         JPanel botoesPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 30));
 
-
+        verCadastro= new JButton("Ver cadastros");
         adcCadastro = new JButton("Adicionar Família");
         adcMembroFamilia = new JButton("Adicionar Membro");
         btnSair = new JButton("Sair");
 
+        addHoverEffect(verCadastro);
         addHoverEffect(adcCadastro);
         addHoverEffect(btnSair);
         addHoverEffect(adcMembroFamilia);
 
+        botoesPanel.add(verCadastro);
         botoesPanel.add(adcCadastro);
         botoesPanel.add(adcMembroFamilia);
         botoesPanel.add(btnSair);
@@ -41,6 +41,7 @@ public class FrontEnd extends JPanel{
 
         add(botoesPanel, BorderLayout.CENTER);
 
+        verCadastro.addActionListener(e -> verCadastros());
         adcCadastro.addActionListener(e -> janelaCadastro());
         adcMembroFamilia.addActionListener(e -> adicionarMembro());
     }
@@ -55,6 +56,8 @@ public class FrontEnd extends JPanel{
             ((FrontEndCadastro) painel).setFrame(janela);
         } else if (painel instanceof FrontEndCadastroMembro) {
             ((FrontEndCadastroMembro) painel).setFrame(janela);
+        } else if (painel instanceof FrontEndVerCadastro) {
+            ((FrontEndVerCadastro) painel).setFrame(janela);
         }
 
         janela.add(painel);
@@ -63,16 +66,21 @@ public class FrontEnd extends JPanel{
         janela.setVisible(true);
     }
 
-
+    // Método para abrir a janela de Cadastro de Família
     private void janelaCadastro() {
-        JPanel cadastroPanel = new FrontEndCadastro(new JFrame());
-        criarJanela("Cadastro de Família", new Dimension(630, 500), cadastroPanel);
+        criarJanela("Cadastro de Família", new Dimension(630, 500), new FrontEndCadastro(null));
     }
 
+    // Método para abrir a janela de Adição de Membro
     private void adicionarMembro() {
-        JPanel membropanel = new FrontEndCadastroMembro(new JFrame());
-        criarJanela("Adição de Membro", new Dimension(800, 1000), membropanel);
+        criarJanela("Adição de Membro", new Dimension(800, 1000), new FrontEndCadastroMembro(null));
     }
+
+    // Método para abrir a janela de Visualização de Cadastros
+    private void verCadastros() {
+        criarJanela("Ver Cadastros", new Dimension(800, 1000), new FrontEndVerCadastro(null));
+    }
+
 
 
     public void btnSair(JFrame frame){

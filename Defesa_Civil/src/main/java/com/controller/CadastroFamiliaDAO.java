@@ -99,7 +99,7 @@ public class CadastroFamiliaDAO {
         }
     }
 
-    public CadastroFamilia BuscarPor(int idFamilia) {
+    public CadastroFamilia BuscarPorId(int idFamilia) {
         EntityManager em = JPAUtil.getEntityManager();
 
         try {
